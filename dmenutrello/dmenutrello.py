@@ -6,11 +6,6 @@ from trello import TrelloClient
 dmenu_show= functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
 
 
-def dict2array(dictionary):
-    output = []
-    for key, values in dictionary.items():
-        output.append(key)
-    return output
 
 def menu(key, token):
     print(key)
@@ -30,19 +25,20 @@ def menu(key, token):
     #card.get_comments()
     #names.append(board.name+ " #" + str(len(board.list_lists())))
     
-    data ={}
+    data = {}
     matchedData = None
     ### BOARD
     #fill data dict 
     for board in client.list_boards():
         data[board.name] = board
     
-    out = dmenu_show(dict2array(data))
-
+    out = dmenu_show(data.keys())
+    board = None
     #check for match
     if out in data:
         match = True
         temp = data[out]
+        board=temp
         data[out] = {}
         for d in temp.list_lists():
             data[out][d.name] = d
@@ -50,11 +46,11 @@ def menu(key, token):
     elif out is not None:
         #no match, add new
         data[out] = client.add_board(out)
-        out=dmenu_show(dict2array(data), prompt="ok")
+        out=dmenu_show(data.keys, prompt="ok")
 
     print(data) 
     data = matchedData
-    out=dmenu_show(dict2array(matchedData))
+    out=dmenu_show(matchedData.keys())
    
     if out in data:
         temp = data[out]
@@ -64,41 +60,11 @@ def menu(key, token):
         matchedData = data[out]
     elif out is not None:
         #no match, add new
-        data.add_board(out)
-        names.append(out)
-        out=dmenu_show(names, prompt="ok")
+        data[out] = board.add_list(out)
+        out=dmenu_show(data.keys(), prompt="ok")
 
-    out=dmenu_show(dict2array(matchedData))
+    out=dmenu_show(matchedData.keys())
 
-    ### LISTS
-    i=0
-    match = False
-    for name in names:
-        if name == out:
-            match = True
-            names = []
-            data = data[i].list_cards()
-            for d in data:
-                names.append(d.name+ " #" + str(len(d.get_comments())))
-        i += 1
-
-    #add new list if nothing matched
-    if match == False and out is not None:
-        matchedData.add_list(out)
-        out=dmenu_show(names, prompt="ok")
-    else:
-        out = dmenu_show(names)
-    
-    i=0
-    match = False
-    for name in names:
-        if name == out:
-            match = True
-            names = []
-            data = data[i].list_cards()
-            for d in data:
-                names.append(d.name+ " #" + str(len(d.get_comments())))
-        i += 1
 
 
 def createParser():
