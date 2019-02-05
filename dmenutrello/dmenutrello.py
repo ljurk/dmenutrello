@@ -6,9 +6,24 @@ from trello import TrelloClient
 
 dmenu_show= functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
 
+def showBoards(data, parent, prompt):
+    out = dmenu_show(data.keys(), prompt=prompt)
+    board = None
+    #check for match
+    if out in data:
+        match = True
+        temp = data[out]
+        board=temp
+        data[out] = {}
+        for d in temp.list_lists():
+            data[out][d.name] = d
+        return data[out]
+    elif out is not None:
+        #no match, add new
+        data[out] = parent.add_board(out)
+        return showBoards(data, prompt, "ok")
+
 def menu(key, token):
-    print(key)
-    print(token)
     client = TrelloClient(
         api_key = key,
         api_secret = token
@@ -31,23 +46,8 @@ def menu(key, token):
     for board in client.list_boards():
         data[board.name] = board
 
-    out = dmenu_show(data.keys())
-    board = None
-    #check for match
-    if out in data:
-        match = True
-        temp = data[out]
-        board=temp
-        data[out] = {}
-        for d in temp.list_lists():
-            data[out][d.name] = d
-        matchedData = data[out]
-    elif out is not None:
-        #no match, add new
-        data[out] = client.add_board(out)
-        out=dmenu_show(data.keys, prompt="ok")
+    matchedData = showBoards(data, client, '')
 
-    print(data)
     data = matchedData
     out=dmenu_show(matchedData.keys())
 
