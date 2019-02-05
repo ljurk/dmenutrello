@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='dmenutrello',
-    version='0.0.3',
+    version='0.0.4',
     packages=['dmenutrello'],
     author="Lukas Jurk",
     author_email="ljurk@pm.me",
