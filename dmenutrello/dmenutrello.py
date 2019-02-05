@@ -4,9 +4,15 @@ import configparser
 from os.path import expanduser
 from trello import TrelloClient
 
+
+BOARDS = 0
+LISTS = 1
+CARDS = 2
+COMMENTS = 3
+
 dmenu_show= functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
 
-def showBoards(data, parent, prompt):
+def show(mode, data, parent, prompt):
     out = dmenu_show(data.keys(), prompt=prompt)
     board = None
     #check for match
@@ -15,13 +21,21 @@ def showBoards(data, parent, prompt):
         temp = data[out]
         board=temp
         data[out] = {}
-        for d in temp.list_lists():
-            data[out][d.name] = d
+        if mode == BOARDS:
+            for d in temp.list_lists():
+                data[out][d.name] = d
+        elif mode == LISTS:
+            for d in temp.list_cards():
+                data[out][d.name] = d
+        elif mode == CARDS:
+            for d in temp.get_comments():
+                data[out][d.name] = d
+
         return data[out]
     elif out is not None:
         #no match, add new
         data[out] = parent.add_board(out)
-        return showBoards(data, prompt, "ok")
+        return show(mode, data, prompt, "ok")
 
 def menu(key, token):
     client = TrelloClient(
@@ -46,23 +60,13 @@ def menu(key, token):
     for board in client.list_boards():
         data[board.name] = board
 
-    matchedData = showBoards(data, client, '')
+    matchedData = show(BOARDS, data, client, '')
 
     data = matchedData
-    out=dmenu_show(matchedData.keys())
+    listData = show(LISTS, matchedData, data, '')
+    show(CARDS, listData, matchedData, '')
+    #out=dmenu_show(matchedData.keys())
 
-    if out in data:
-        temp = data[out]
-        data[out] = {}
-        for d in temp.list_cards():
-            data[out][d.name] = d
-        matchedData = data[out]
-    elif out is not None:
-        #no match, add new
-        data[out] = board.add_list(out)
-        out=dmenu_show(data.keys(), prompt="ok")
-
-    out=dmenu_show(matchedData.keys())
 
 
 def main():
