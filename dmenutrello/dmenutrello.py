@@ -1,11 +1,10 @@
 import functools
 import dmenu
-import argparse
+import configparser
+
 from trello import TrelloClient
 
 dmenu_show= functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
-
-
 
 def menu(key, token):
     print(key)
@@ -66,24 +65,15 @@ def menu(key, token):
     out=dmenu_show(matchedData.keys())
 
 
-
-def createParser():
-    """Create argparse object"""
-
-    parser = argparse.ArgumentParser(description="Append -h to any command to view its syntax.")
-    parser._positionals.title = "commands"
-
-
-    parser.add_argument('key', metavar='KEY', type=str, help='path')
-    parser.add_argument('token', metavar='TOKEN', type=str, help='path')
-
-    return parser
-
 def main():
 
-    parser = createParser()
-    args = parser.parse_args()
-    menu(args.key, args.token)
+	config = configparser.ConfigParser()
+	config.read('~/.dmenutrello')
+
+	key = config['TRELLO']['key']
+	token = config['TRELLO']['token']
+
+    menu(key, token)
 
 if __name__ == '__main__':
     main()

@@ -8,13 +8,20 @@
 
 ### Usage
 
+create a file called .dmenutrello in your home directory with the folowing content
+
+	[TRELLO]
+	key = YOUR_TRELLO_KEY
+	token = YOUR_TRELLO_TOKEN
+
+
 to use this script with your trello, pass your key and token to dmenutrello
 
-    dmenutrello KEY TOKEN
+    dmenutrello
 
 example for i3
 
-    bindkey $mod+t dmenutrello KEY TOKEN
+    bindkey $mod+t dmenutrello
 
 you can navigate throug your boards, lists, cards and comments, by typing in a new name the corresponding element will be added
 
