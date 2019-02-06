@@ -32,7 +32,7 @@ to use this script call
 
 example i3 key binding
 
-    bindkey $mod+t dmenutrello
+    bindsym $mod+t exec $HOME/.local/bin/dmenutrello
 
 
 
