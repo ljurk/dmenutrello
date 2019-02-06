@@ -34,9 +34,14 @@ def show(mode, data, parent, prompt):
 
         return data[out], this
     elif out is not None:
-        #no match, add new
-        data[out] = parent.add_board(out)
-        return show(mode, data, prompt, "ok")
+        #no match, add new and call this function again with another prompt
+        if mode == BOARDS:
+            data[out] = parent.add_board(out)
+        elif mode == LISTS:
+            data[out] = parent.add_list(out)
+        elif mode == CARDS:
+            data[out] = parent.add_card(out)
+        return show(mode, data, parent, "ok")
 
 def menu(key, token):
     client = TrelloClient(
