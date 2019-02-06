@@ -4,7 +4,7 @@ import configparser
 from os.path import expanduser
 from trello import TrelloClient
 
-
+#constants
 BOARDS = 0
 LISTS = 1
 CARDS = 2
@@ -18,20 +18,21 @@ def show(mode, data, parent, prompt):
     #check for match
     if out in data:
         match = True
-        temp = data[out]
-        board=temp
+        #save object for return, 'this' is the parent of the underlying object
+        this = data[out]
+        #override match with new dictionary and fill it
         data[out] = {}
         if mode == BOARDS:
-            for d in temp.list_lists():
+            for d in this.list_lists():
                 data[out][d.name] = d
         elif mode == LISTS:
-            for d in temp.list_cards():
+            for d in this.list_cards():
                 data[out][d.name] = d
         elif mode == CARDS:
-            for d in temp.get_comments():
+            for d in this.get_comments():
                 data[out][d.name] = d
 
-        return data[out]
+        return data[out], this
     elif out is not None:
         #no match, add new
         data[out] = parent.add_board(out)
@@ -55,19 +56,20 @@ def menu(key, token):
 
     data = {}
     matchedData = None
-    ### BOARD
-    #fill data dict
+    #initial filling
     for board in client.list_boards():
         data[board.name] = board
 
-    matchedData = show(BOARDS, data, client, '')
-
-    data = matchedData
-    listData = show(LISTS, matchedData, data, '')
-    show(CARDS, listData, matchedData, '')
-    #out=dmenu_show(matchedData.keys())
-
-
+    #matchedData = show(BOARDS, data, client, '')
+    data, parent = show(BOARDS, data, client, '')
+    print(data)
+    print(parent)
+    data, parent  = show(LISTS, data, parent, '')
+    print(data)
+    print(parent)
+    data, parent  = show(CARDS, data, parent, '')
+    print(data)
+    print(parent)
 
 def main():
     config = configparser.ConfigParser()
