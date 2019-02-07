@@ -19,11 +19,18 @@ to install my package simply type
 
 ### Usage
 
-create a file called .dmenutrello in your home directory with the following content
+create a file called `.dmenutrello` in your home directory with your Trello key & token and your dmenu appearance settings
 
 	[TRELLO]
 	key = YOUR_TRELLO_KEY
 	token = YOUR_TRELLO_TOKEN
+
+        [DMENU]
+        font = DejaVu Sans Mono for Powerline-14
+        background_selected = #2aa198
+        foreground_selected = #191919
+        foreground = #2aa198
+        background = #191919
 
 
 to use this script call 
@@ -43,7 +50,9 @@ by typing in a new name the corresponding element will be added
 
 ### todo
 
-- add a .. option to go up one level
+- [x] basic navigation
+- [x] add a .. option to go up one level
+- [x] add objects(board, lists, cards, comments)
 - open comments in vim and save them
 - open links in webbrowser
 - mark cards as checked

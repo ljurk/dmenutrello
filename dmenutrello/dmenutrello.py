@@ -10,7 +10,7 @@ LISTS = 1
 CARDS = 2
 COMMENTS = 3
 
-dmenu_show = functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
+dmenu_show = None
 
 def show(mode, data, parent, prompt):
     menuItems= []
@@ -49,12 +49,20 @@ def show(mode, data, parent, prompt):
         return show(mode, data, parent, "ok")
 
 def main():
+    global dmenu_show
     config = configparser.ConfigParser()
     parent = [None] * 5
     data = [None] * 5
     data[0] = {}
 
     config.read(expanduser('~/.dmenutrello'))
+
+    dmenu_show = functools.partial(dmenu.show,
+            font=config.get('DMENU', 'font'),
+            background_selected=config.get('DMENU','background_selected'),
+            foreground_selected=config.get('DMENU','foreground_selected'),
+            foreground=config.get('DMENU','foreground'),
+            background=config.get('DMENU','background'))
 
     key = config.get('TRELLO', 'key')
     token = config.get('TRELLO', 'token')
