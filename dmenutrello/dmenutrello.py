@@ -3,12 +3,15 @@ import dmenu
 import configparser
 from os.path import expanduser
 from trello import TrelloClient
+import sys, tempfile, os
+from subprocess import call
 
 #constants
 BOARDS = 0
 LISTS = 1
 CARDS = 2
 COMMENTS = 3
+EDITOR = os.environ.get('EDITOR','vim')
 
 dmenu_show = None
 
@@ -35,6 +38,28 @@ def show(mode, data, parent, prompt):
         elif mode == CARDS:
             for d in this.get_comments():
                 data[out][d['data']['text']] = d
+        elif mode == COMMENTS:
+            data[out] = this
+            #edit in vim
+            initial_message = out.encode('utf-8')
+            with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+                tf.write(initial_message)
+                tf.flush()
+                call([EDITOR, tf.name])
+
+                # do the parsing with `tf` using regular File operations.
+                # for instance:
+                tf.seek(0)
+                edited_message = tf.read().decode('utf-8').replace('\n','')
+                #update comment by id
+                if edited_message != '':
+                    parent.update_comment(data[out]['id'], edited_message)
+                    data[edited_message] = data[out]
+                    del data[out]
+                    return show(mode, data, parent, "ok")
+                else:
+                    return show(mode, data, parent, "not allowed")
+
         return data[out], this
     elif out is not None:
         #no match, add new and call this function again with another prompt

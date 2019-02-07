@@ -53,6 +53,6 @@ by typing in a new name the corresponding element will be added
 - [x] basic navigation
 - [x] add a .. option to go up one level
 - [x] add objects(board, lists, cards, comments)
-- open comments in vim and save them
+- [x] open comments in vim and save them
 - open links in webbrowser
 - mark cards as checked
