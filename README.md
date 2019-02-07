@@ -20,18 +20,18 @@ to install my package simply type
 ### Usage
 
 create a file called `.dmenutrello` in your home directory with your Trello key & token and your dmenu appearance settings
+```
+[TRELLO]
+key = YOUR_TRELLO_KEY
+token = YOUR_TRELLO_TOKEN
 
-	[TRELLO]
-	key = YOUR_TRELLO_KEY
-	token = YOUR_TRELLO_TOKEN
-
-        [DMENU]
-        font = DejaVu Sans Mono for Powerline-14
-        background_selected = #2aa198
-        foreground_selected = #191919
-        foreground = #2aa198
-        background = #191919
-
+[DMENU]
+font = DejaVu Sans Mono for Powerline-14
+background_selected = #2aa198
+foreground_selected = #191919
+foreground = #2aa198
+background = #191919
+```
 
 to use this script call 
 
