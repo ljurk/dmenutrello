@@ -42,7 +42,13 @@ def show(mode, data, parent, prompt):
             data[out] = parent.comment(out)
         return show(mode, data, parent, "ok")
 
-def menu(key, token):
+def main():
+    config = configparser.ConfigParser()
+    config.read(expanduser('~/.dmenutrello'))
+
+    key = config.get('TRELLO', 'key')
+    token = config.get('TRELLO', 'token')
+
     parent = TrelloClient(
         api_key = key,
         api_secret = token
@@ -61,15 +67,6 @@ def menu(key, token):
     data, parent  = show(CARDS, data, parent, '')
     #COMMENTS
     data, parent  = show(COMMENTS, data, parent, '')
-
-def main():
-    config = configparser.ConfigParser()
-    config.read(expanduser('~/.dmenutrello'))
-
-    key = config.get('TRELLO', 'key')
-    token = config.get('TRELLO', 'token')
-
-    menu(key, token)
 
 if __name__ == '__main__':
     main()
