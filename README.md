@@ -3,23 +3,29 @@
 ## trello for dmenu
 
 ### Installation
-	
+
 Install dmenu
 for Arch-based distros:
-	
+
 	pacman -S dmenu
-	
+
 for Debian-based distros:
 
 	apt-get install dmenu
-	
+
 to install my package simply type
 
     pip install dmenutrello --user
 
 ### Usage
 
-create a file called `.dmenutrello` in your home directory with your Trello key & token and your dmenu appearance settings
+create a file called `.dmenutrello` in your home directory with this content:
+
+- your Trello key & token
+- your dmenu appearance settings
+- the terminal in which vim will be opened
+
+like this:
 ```
 [TRELLO]
 key = YOUR_TRELLO_KEY
@@ -31,9 +37,14 @@ background_selected = #2aa198
 foreground_selected = #191919
 foreground = #2aa198
 background = #191919
+
+[TERMINAL]
+terminal = urxvt
+terminal_argument = -e
+
 ```
 
-to use this script call 
+to use this script call
 
     dmenutrello
 

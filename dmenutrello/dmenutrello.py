@@ -11,8 +11,10 @@ BOARDS = 0
 LISTS = 1
 CARDS = 2
 COMMENTS = 3
-EDITOR = os.environ.get('EDITOR','vim')
 
+EDITOR = os.environ.get('EDITOR','vim')
+TERMINAL = None
+TERMINALARG = None
 dmenu_show = None
 
 def show(mode, data, parent, prompt):
@@ -40,12 +42,13 @@ def show(mode, data, parent, prompt):
                 data[out][d['data']['text']] = d
         elif mode == COMMENTS:
             data[out] = this
-            #edit in vim
+            #insert the comment text to a tmp file and edit it in vim
             initial_message = out.encode('utf-8')
             with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
                 tf.write(initial_message)
                 tf.flush()
-                call([EDITOR, tf.name])
+                #open new terminal and open vim
+                call([TERMINAL, TERMINALARG, EDITOR, tf.name])
 
                 # do the parsing with `tf` using regular File operations.
                 # for instance:
@@ -74,7 +77,7 @@ def show(mode, data, parent, prompt):
         return show(mode, data, parent, "ok")
 
 def main():
-    global dmenu_show
+    global dmenu_show, TERMINAL, TERMINALARG
     config = configparser.ConfigParser()
     parent = [None] * 5
     data = [None] * 5
@@ -89,6 +92,8 @@ def main():
             foreground=config.get('DMENU','foreground'),
             background=config.get('DMENU','background'))
 
+    TERMINAL = config.get('TERMINAL','terminal')
+    TERMINALARG = config.get('TERMINAL','terminal_argument')
     key = config.get('TRELLO', 'key')
     token = config.get('TRELLO', 'token')
     parent[0] = TrelloClient(
