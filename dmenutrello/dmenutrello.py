@@ -13,8 +13,14 @@ COMMENTS = 3
 dmenu_show = functools.partial(dmenu.show, font='DejaVu Sans Mono for Powerline-14', background_selected='#2aa198',foreground_selected='#191919', foreground='#2aa198', background='#191919')
 
 def show(mode, data, parent, prompt):
-    out = dmenu_show(data.keys(), prompt=prompt)
+    menuItems= []
+    if mode != BOARDS:
+        menuItems.append('..')
+    menuItems.extend(data.keys())
+    out = dmenu_show(menuItems, prompt=prompt)
     #check for match
+    if out == '..':
+        return data, parent
     if out in data:
         #save object for return, 'this' is the parent of the underlying object
         this = data[out]
@@ -44,30 +50,41 @@ def show(mode, data, parent, prompt):
 
 def main():
     config = configparser.ConfigParser()
+    parent = [None] * 5
+    data = [None] * 5
+    data[0] = {}
+
     config.read(expanduser('~/.dmenutrello'))
 
     key = config.get('TRELLO', 'key')
     token = config.get('TRELLO', 'token')
-
-    parent = TrelloClient(
+    parent[0] = TrelloClient(
         api_key = key,
         api_secret = token
         )
 
-    data = {}
     #initial filling
-    for board in parent.list_boards():
-        data[board.name] = board
+    for board in parent[0].list_boards():
+        data[0][board.name] = board
 
-    #BOARDS
-    data, parent = show(BOARDS, data, parent, '')
-    #LISTS
-    data, parent  = show(LISTS, data, parent, '')
-    #CARDS
-    data, parent  = show(CARDS, data, parent, '')
-    #COMMENTS
-    data, parent  = show(COMMENTS, data, parent, '')
+    # itreate through the levels
+    i = 0
+    while i != 4:
+        data[i+1], parent[i+1] = show(i, data[i], parent[i], '')
+        # if the same element returns its a back(..) move
+        if data[i+1] == data[i]:
+            #because show function replaces the trello object with a dict of the sub object
+            # I have to find it and replace it with the trello object
+            for key,value in data[i-1].items():
+                if type(value) is dict:
+                    data[i-1][key] = parent[i]
+            i -= 1
+        else:
+            i += 1
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
 
