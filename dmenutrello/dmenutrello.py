@@ -30,8 +30,7 @@ def show(mode, data, parent, prompt):
                 data[out][d.name] = d
         elif mode == CARDS:
             for d in this.get_comments():
-                data[out][d.name] = d
-
+                data[out][d['data']['text']] = d
         return data[out], this
     elif out is not None:
         #no match, add new and call this function again with another prompt
@@ -41,6 +40,8 @@ def show(mode, data, parent, prompt):
             data[out] = parent.add_list(out)
         elif mode == CARDS:
             data[out] = parent.add_card(out)
+        elif mode == COMMENTS:
+            data[out] = parent.comment(out)
         return show(mode, data, parent, "ok")
 
 def menu(key, token):
@@ -50,31 +51,20 @@ def menu(key, token):
         )
     match = False
 
-    #client.list_boards()
-    #client.add_board()
-    #board.list_lists()
-    #board.add_list()
-    #list.list_cards()
-    #list.add_card()
-    #card.get_comments()
-    #names.append(board.name+ " #" + str(len(board.list_lists())))
-
     data = {}
     matchedData = None
     #initial filling
     for board in client.list_boards():
         data[board.name] = board
 
-    #matchedData = show(BOARDS, data, client, '')
+    #BOARDS
     data, parent = show(BOARDS, data, client, '')
-    print(data)
-    print(parent)
+    #LISTS
     data, parent  = show(LISTS, data, parent, '')
-    print(data)
-    print(parent)
+    #CARDS
     data, parent  = show(CARDS, data, parent, '')
-    print(data)
-    print(parent)
+    #COMMENTS
+    data, parent  = show(COMMENTS, data, parent, '')
 
 def main():
     config = configparser.ConfigParser()
