@@ -1,3 +1,5 @@
+import dill
+import json
 import functools
 import dmenu
 import configparser
@@ -12,10 +14,48 @@ LISTS = 1
 CARDS = 2
 COMMENTS = 3
 
-EDITOR = os.environ.get('EDITOR','vim')
+#EDITOR = os.environ.get('EDITOR','vim')
+EDITOR = None
 TERMINAL = None
 TERMINALARG = None
 dmenu_show = None
+
+cache = './dmenutrellocache'
+
+def openCache(cache):
+    with open(cache, 'rb') as cachefile:
+        return dill.load(cachefile)
+
+def readJson(jsonfile):
+    with open(jsonfile, 'r') as read_file:
+        data = json.load(read_file)
+    return data
+
+def writeJson(jsonfile, data):
+    with open(jsonfile, 'w') as write_file:
+                    json.dump(data,
+                            write_file,
+                            ensure_ascii = False,
+                            sort_keys = True,
+                            indent = 4 )
+
+def toJson(client):
+    output = {}
+    for board in client.list_boards():
+        if board.name == 'Chaos':
+            output[board.name] = {}
+            for singlelist in board.list_lists():
+                output[board.name][singlelist.name] = {}
+                for card in singlelist.list_cards():
+                    i = 0
+                    output[board.name][singlelist.name][card.name] = {}
+                    for comment in card.get_comments():
+                        output[board.name][singlelist.name][card.name][str(i)] = comment['data']['text']
+                        i+=1
+    return output 
+
+def listIt(client):
+    formatData(toJson(client),0)
 
 def show(mode, data, parent, prompt):
     menuItems= []
@@ -77,7 +117,7 @@ def show(mode, data, parent, prompt):
         return show(mode, data, parent, "ok")
 
 def main():
-    global dmenu_show, TERMINAL, TERMINALARG
+    global dmenu_show, TERMINAL, TERMINALARG, EDITOR
     config = configparser.ConfigParser()
     parent = [None] * 5
     data = [None] * 5
@@ -94,6 +134,7 @@ def main():
 
     TERMINAL = config.get('TERMINAL','terminal')
     TERMINALARG = config.get('TERMINAL','terminal_argument')
+    EDITOR = config.get('TERMINAL', 'editor')
     key = config.get('TRELLO', 'key')
     token = config.get('TRELLO', 'token')
     parent[0] = TrelloClient(
@@ -101,6 +142,8 @@ def main():
         api_secret = token
         )
 
+    with open(cache, 'wb') as output:
+        dill.dump(parent[0], output)
     #initial filling
     for board in parent[0].list_boards():
         data[0][board.name] = board
@@ -122,7 +165,9 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        test=        openCache(cache)
+        print(test.list_boards())
+        #main()
     except KeyboardInterrupt:
         pass
 
