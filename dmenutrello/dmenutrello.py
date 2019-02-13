@@ -1,4 +1,4 @@
-import dill
+import jsonpickle
 import json
 import functools
 import dmenu
@@ -20,11 +20,15 @@ TERMINAL = None
 TERMINALARG = None
 dmenu_show = None
 
-cache = './dmenutrellocache'
+cache = './dmenutrellocache.json'
+
+def writeCache(cache, data):
+    with open(cache, 'w') as cachefile:
+        cachefile.write(jsonpickle.encode(data))
 
 def openCache(cache):
-    with open(cache, 'rb') as cachefile:
-        return dill.load(cachefile)
+    with open(cache, 'r') as cachefile:
+        return jsonpickle.decode(cachefile.read())
 
 def readJson(jsonfile):
     with open(jsonfile, 'r') as read_file:
@@ -43,11 +47,14 @@ def toJson(client):
     output = {}
     for board in client.list_boards():
         if board.name == 'Chaos':
+            output[board.name+'_obj'] = board
             output[board.name] = {}
             for singlelist in board.list_lists():
+                output[board.name][singlelist.name + '_obj'] = singlelist
                 output[board.name][singlelist.name] = {}
                 for card in singlelist.list_cards():
                     i = 0
+                    output[board.name][singlelist.name][card.name + '_obj'] = card
                     output[board.name][singlelist.name][card.name] = {}
                     for comment in card.get_comments():
                         output[board.name][singlelist.name][card.name][str(i)] = comment['data']['text']
@@ -116,6 +123,30 @@ def show(mode, data, parent, prompt):
             data[out] = parent.comment(out)
         return show(mode, data, parent, "ok")
 
+def main2():
+    global dmenu_show, TERMINAL, TERMINALARG, EDITOR
+    config = configparser.ConfigParser()
+    data = openCache(cache)
+
+    config.read(expanduser('~/.dmenutrello'))
+
+    dmenu_show = functools.partial(dmenu.show,
+            font=config.get('DMENU', 'font'),
+            background_selected=config.get('DMENU','background_selected'),
+            foreground_selected=config.get('DMENU','foreground_selected'),
+            foreground=config.get('DMENU','foreground'),
+            background=config.get('DMENU','background'))
+
+    TERMINAL = config.get('TERMINAL','terminal')
+    TERMINALARG = config.get('TERMINAL','terminal_argument')
+    EDITOR = config.get('TERMINAL', 'editor')
+    key = config.get('TRELLO', 'key')
+    token = config.get('TRELLO', 'token')
+
+    show(0, data['Chaos'], data['Chaos_obj'], '')
+    # itreate through the levels
+    i = 0
+
 def main():
     global dmenu_show, TERMINAL, TERMINALARG, EDITOR
     config = configparser.ConfigParser()
@@ -142,9 +173,7 @@ def main():
         api_secret = token
         )
 
-    with open(cache, 'wb') as output:
-        dill.dump(parent[0], output)
-    #initial filling
+    writeCache(cache, toJson(parent[0]))
     for board in parent[0].list_boards():
         data[0][board.name] = board
 
@@ -165,9 +194,7 @@ def main():
 
 if __name__ == '__main__':
     try:
-        test=        openCache(cache)
-        print(test.list_boards())
-        #main()
+        main2()
     except KeyboardInterrupt:
         pass
 
