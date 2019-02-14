@@ -45,21 +45,23 @@ def writeJson(jsonfile, data):
 
 def toJson(client):
     output = {}
+    output['/_obj'] = client
+    output['/'] = {}
     for board in client.list_boards():
-        if board.name == 'Chaos':
-            output[board.name+'_obj'] = board
-            output[board.name] = {}
-            for singlelist in board.list_lists():
-                output[board.name][singlelist.name + '_obj'] = singlelist
-                output[board.name][singlelist.name] = {}
-                for card in singlelist.list_cards():
-                    i = 0
-                    output[board.name][singlelist.name][card.name + '_obj'] = card
-                    output[board.name][singlelist.name][card.name] = {}
-                    for comment in card.get_comments():
-                        output[board.name][singlelist.name][card.name][str(i)] = comment['data']['text']
-                        i+=1
-    return output 
+        #if board.name == 'Chaos':
+        output['/'][board.name+'_obj'] = board
+        output['/'][board.name] = {}
+        for singlelist in board.list_lists():
+            output['/'][board.name][singlelist.name + '_obj'] = singlelist
+            output['/'][board.name][singlelist.name] = {}
+            for card in singlelist.list_cards():
+                i = 0
+                output['/'][board.name][singlelist.name][card.name + '_obj'] = card
+                output['/'][board.name][singlelist.name][card.name] = {}
+                for comment in card.get_comments():
+                    output['/'][board.name][singlelist.name][card.name][str(i)] = comment['data']['text']
+                    i+=1
+    return output
 
 def listIt(client):
     formatData(toJson(client),0)
@@ -123,6 +125,22 @@ def show(mode, data, parent, prompt):
             data[out] = parent.comment(out)
         return show(mode, data, parent, "ok")
 
+def show2(mode, data, parent, prompt):
+    menuItems= []
+    if mode != BOARDS:
+        menuItems.append('..')
+    for key in data.keys():
+        if '_obj' not in key:
+            menuItems.append(key)
+    out = dmenu_show(menuItems, prompt=prompt)
+
+    if out == '..':
+        show2(mode - 1, parent, parent, '')
+    else:
+        show2(mode + 1, data[out], data, '')
+    #for key, value in data.items():
+    #    print(value)
+
 def main2():
     global dmenu_show, TERMINAL, TERMINALARG, EDITOR
     config = configparser.ConfigParser()
@@ -140,12 +158,7 @@ def main2():
     TERMINAL = config.get('TERMINAL','terminal')
     TERMINALARG = config.get('TERMINAL','terminal_argument')
     EDITOR = config.get('TERMINAL', 'editor')
-    key = config.get('TRELLO', 'key')
-    token = config.get('TRELLO', 'token')
-
-    show(0, data['Chaos'], data['Chaos_obj'], '')
-    # itreate through the levels
-    i = 0
+    show2(0, data['/'], data['/'],'')
 
 def main():
     global dmenu_show, TERMINAL, TERMINALARG, EDITOR
@@ -190,7 +203,7 @@ def main():
                     data[i-1][key] = parent[i]
             i -= 1
         else:
-            i += 1
+             i += 1
 
 if __name__ == '__main__':
     try:
