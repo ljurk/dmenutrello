@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/dmenutrello.svg)](https://badge.fury.io/py/dmenutrello)
+
 # dmenutrello
 
 ## trello for dmenu
