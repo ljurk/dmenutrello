@@ -1,5 +1,6 @@
 import functools
 import dmenu
+from rofi import Rofi
 import configparser
 from os.path import expanduser
 from trello import TrelloClient
@@ -12,6 +13,8 @@ LISTS = 1
 CARDS = 2
 COMMENTS = 3
 
+r = Rofi()
+rofi = True
 EDITOR = os.environ.get('EDITOR','vim')
 TERMINAL = None
 TERMINALARG = None
@@ -22,7 +25,13 @@ def show(mode, data, parent, prompt):
     if mode != BOARDS:
         menuItems.append('..')
     menuItems.extend(data.keys())
-    out = dmenu_show(menuItems, prompt=prompt)
+    if rofi:
+        out, key = dmenu_show(menuItems)#, prompt=prompt)
+        if out == -1:
+            sys.exit()
+        out=menuItems[out]
+    else:
+        out = dmenu_show(menuItems, prompt=prompt)
     #check for match
     if out == '..':
         return data, parent
@@ -85,12 +94,15 @@ def main():
 
     config.read(expanduser('~/.dmenutrello'))
 
-    dmenu_show = functools.partial(dmenu.show,
-            font=config.get('DMENU', 'font'),
-            background_selected=config.get('DMENU','background_selected'),
-            foreground_selected=config.get('DMENU','foreground_selected'),
-            foreground=config.get('DMENU','foreground'),
-            background=config.get('DMENU','background'))
+    if rofi:
+        dmenu_show = functools.partial(r.select,":<>")
+    else:
+        dmenu_show = functools.partial(dmenu.show,
+        font=config.get('DMENU', 'font'),
+        background_selected=config.get('DMENU','background_selected'),
+        foreground_selected=config.get('DMENU','foreground_selected'),
+        foreground=config.get('DMENU','foreground'),
+        background=config.get('DMENU','background'))
 
     TERMINAL = config.get('TERMINAL','terminal')
     TERMINALARG = config.get('TERMINAL','terminal_argument')
