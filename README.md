@@ -26,6 +26,7 @@ create a file called `.dmenutrello` in your home directory with this content:
 - your Trello key & token
 - your dmenu appearance settings
 - the terminal in which vim will be opened
+- the dmenu command (if you want to use rofi you have to place a script with the content `rofi -dmenu` somewhere and put the path to it to command config value)
 
 like this:
 ```
@@ -39,6 +40,7 @@ background_selected = #2aa198
 foreground_selected = #191919
 foreground = #2aa198
 background = #191919
+command = dmenu
 
 [TERMINAL]
 terminal = urxvt

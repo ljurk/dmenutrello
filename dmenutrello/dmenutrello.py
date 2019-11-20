@@ -90,7 +90,8 @@ def main():
             background_selected=config.get('DMENU','background_selected'),
             foreground_selected=config.get('DMENU','foreground_selected'),
             foreground=config.get('DMENU','foreground'),
-            background=config.get('DMENU','background'))
+            background=config.get('DMENU','background'),
+            command=config.get('DMENU', 'command'))
 
     TERMINAL = config.get('TERMINAL','terminal')
     TERMINALARG = config.get('TERMINAL','terminal_argument')
